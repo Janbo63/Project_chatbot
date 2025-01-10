@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude AI Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        #chat-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        #chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #e6f2ff;
+            text-align: right;
+        }
+        .ai-message {
+            background-color: #f0f0f0;
+        }
+        #query-form {
+            display: flex;
+        }
+        #query {
+            flex-grow: 1;
+            padding: 10px;
+            margin-right: 10px;
+        }
+        #submit-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Claude AI Development Assistant</h1>
+        <div id="chat-container">
+            <div id="chat-messages">
+                {% for message in messages %}
+                    <div class="message {{ 'user-message' if message.role == 'user' else 'ai-message' }}">
+                        {{ message.content }}
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <form id="query-form">
+                <input type="text" id="query" name="query" placeholder="Ask me anything about software development..." required>
+                <button type="submit" id="submit-btn">Send</button>
+            </form>
+        </div>
+
+        <script>
+            document.getElementById('query-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const queryInput = document.getElementById('query');
+                const query = queryInput.value;
+                const messagesContainer = document.getElementById('chat-messages');
+
+                // Add user message
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.classList.add('message', 'user-message');
+                userMessageDiv.textContent = query;
+                messagesContainer.appendChild(userMessageDiv);
+
+                // Clear input
+                queryInput.value = '';
+
+                try {
+                    // Send request
+                    const response = await fetch('/', {
+                        method: 'POST',
+                        body: new FormData(this)
+                    });
+
+                    const data = await response.json();
+
+                    // Add AI response
+                    const aiMessageDiv = document.createElement('div');
+                    aiMessageDiv.classList.add('message', 'ai-message');
+                    aiMessageDiv.textContent = data.response || 'Sorry, I could not process your request.';
+                    messagesContainer.appendChild(aiMessageDiv);
+
+                    // Scroll to bottom
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                } catch (error) {
+                    console.error('Error:', error);
+                    const errorDiv = document.createElement('div');
+                    errorDiv.classList.add('message', 'ai-message');
+                    errorDiv.textContent = 'An error occurred while processing your request.';
+                    messagesContainer.appendChild(errorDiv);
+                }
+            });
+        </script>
+    </div>
+</body>
+</html>

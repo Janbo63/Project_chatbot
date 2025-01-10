@@ -1,0 +1,12 @@
+anthropic
+python-dotenv
+fastapi
+uvicorn
+jinja2
+python-multipart
+requests
+pydantic
+starlette
+httpx
+openai
+logging
