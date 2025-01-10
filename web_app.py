@@ -14,8 +14,12 @@ from project_management import ProjectManager
 
 # Configure logging
 logging.basicConfig(
-    level=logging.DEBUG, 
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.DEBUG,  # Set to DEBUG to capture more information
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),  # Output to console
+        logging.FileHandler('project_chatbot.log')  # Output to file
+    ]
 )
 logger = logging.getLogger(__name__)
 
@@ -300,20 +304,23 @@ async def chat_endpoint(request: Request):
         query = form.get('query', '')
 
         if not query:
+            logger.error("No query provided")
             return JSONResponse(content={"error": "No query provided"}, status_code=400)
 
         # Run the AI assistant
         try:
             response = dev_assistant.run(query)
+            logger.info(f"Successfully processed query: {query}")
+            logger.debug(f"Response: {response[:100]}...")  # Log first 100 chars of response
         except Exception as e:
-            logger.error(f"Error in AI processing: {e}")
+            logger.error(f"Error in AI processing: {e}", exc_info=True)
             response = f"An error occurred: {str(e)}"
 
         # Return response to browser
         return JSONResponse(content={"response": response})
 
     except Exception as e:
-        logger.error(f"Endpoint error: {e}")
+        logger.error(f"Endpoint error: {e}", exc_info=True)
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 @app.post("/reset", response_class=HTMLResponse)

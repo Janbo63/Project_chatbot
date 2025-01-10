@@ -58,6 +58,11 @@
             border: none;
             cursor: pointer;
         }
+        #loading {
+            text-align: center;
+            color: #888;
+            display: none;
+        }
         h1 {
             text-align: center;
             color: #333;
@@ -77,6 +82,8 @@
                 {% endfor %}
             </div>
             
+            <div id="loading">Processing your request...</div>
+            
             <form id="query-form">
                 <input type="text" id="query" name="query" placeholder="Ask me anything about software development..." required>
                 <button type="submit" id="submit-btn">Send</button>
@@ -89,6 +96,13 @@
                 const queryInput = document.getElementById('query');
                 const query = queryInput.value;
                 const messagesContainer = document.getElementById('chat-messages');
+                const loadingIndicator = document.getElementById('loading');
+                const submitBtn = document.getElementById('submit-btn');
+
+                // Disable input during processing
+                queryInput.disabled = true;
+                submitBtn.disabled = true;
+                loadingIndicator.style.display = 'block';
 
                 // Add user message
                 const userMessageDiv = document.createElement('div');
@@ -106,6 +120,10 @@
                         body: new FormData(this)
                     });
 
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
                     const data = await response.json();
 
                     // Add AI response
@@ -120,8 +138,13 @@
                     console.error('Error:', error);
                     const errorDiv = document.createElement('div');
                     errorDiv.classList.add('message', 'ai-message');
-                    errorDiv.textContent = 'An error occurred while processing your request.';
+                    errorDiv.textContent = `An error occurred: ${error.message}`;
                     messagesContainer.appendChild(errorDiv);
+                } finally {
+                    // Re-enable input
+                    queryInput.disabled = false;
+                    submitBtn.disabled = false;
+                    loadingIndicator.style.display = 'none';
                 }
             });
         </script>
